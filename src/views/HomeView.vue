@@ -1,18 +1,31 @@
 <template>
-  <div class="home">
+  <!-- <div class="home"> -->
     <div class="divCont">
       <div class="testDiv">
         <div class="divStyle circleStyle">
           <div class="circle"></div>
-          <div class="circle circle3">
+          <div class="circle circle3" @click="addXp(50)">
             <div class="dot"></div>
             <div class="dot"></div>
             <div class="dot"></div>
           </div>
         </div>
         <div class="divStyle textBox">
-          <div style="text-align:start;font-weight:bold;font-size:18px;">{{profile.name}}</div>
-          <div style="text-align:start;font-size:18px;">rasa: {{profile.race}}</div>
+          <div>
+            <div style="text-align:start;font-weight:bold;font-size:18px;">{{profile.name}}</div>
+            <div style="text-align:start;font-size:18px;">rasa: {{profile.race}}</div>
+          </div>
+          <div class="statistic_container">
+            <p class="statistic">stat1: 
+              <b
+                :style="profile.equip_stat1+profile.stat1>profile.stat1?{color: 'green'}:{color:'black'}"
+              >{{profile.equip_stat1+profile.stat1}}</b>
+            </p>
+            <p class="statistic">stat2: <b :style="profile.equip_stat2+profile.stat2>profile.stat2?{color: 'green'}:{color:'black'}">{{profile.equip_stat2+profile.stat2}}</b></p>
+            <p class="statistic">stat3: <b :style="profile.equip_stat3+profile.stat3>profile.stat3?{color: 'green'}:{color:'black'}">{{profile.equip_stat3+profile.stat3}}</b></p>
+            <p class="statistic">stat4: <b :style="profile.equip_stat4+profile.stat4>profile.stat4?{color: 'green'}:{color:'black'}">{{profile.equip_stat4+profile.stat4}}</b></p>
+            <p class="statistic">stat5: <b :style="profile.equip_stat5+profile.stat5>profile.stat5?{color: 'green'}:{color:'black'}">{{profile.equip_stat5+profile.stat5}}</b></p>
+          </div>
         </div>
         <div class="divStyle">
           <div class="xpText">
@@ -28,7 +41,7 @@
         </div>
       </div>
     </div>
-  </div>
+  <!-- </div> -->
 </template>
 
 <script>
@@ -44,6 +57,8 @@ export default {
     }
   },
   methods: {
+
+    //Get data of logged in profile
     async getProfileData() {
       let endpoint = '/api/v1/profiles/'
       try {
@@ -55,17 +70,9 @@ export default {
 				alert(error.response.statusText);
       }
     },
-    async getItemsData() {
-      let endpoint = '/api/v1/items/'
-      try {
-        const response = await axios.get(endpoint)
-        this.items.push(...response.data)
-        console.log(this.items)
-      } catch (error) {
-        console.log(error.response);
-        alert(error.response.statusText);
-      }
-    },
+
+
+    //Delete exact item function
     async deleteItem(uuid, item){
       let endpoint = `/api/v1/items/${uuid}/`
       try {
@@ -77,6 +84,8 @@ export default {
         alert(error.response.statusText)
       }
     },
+
+    //Adding random item function, fust for testing purpose
     async addItem(){
       const x = Math.floor(Math.random() * 1000)
       if (x > 500) {
@@ -90,13 +99,40 @@ export default {
       } else {
         console.log('u dont succed during ur trip')
       }
+    },
 
+    //function to add xp after atack or trip or other source of expieriece points, addedXp is the number of xp u want to add.
+    async addXp(addedXp) {
+      const endpoint = `api/v1/profiles/${this.profile.uuid}/`
+      try {
+          const xpGain = addedXp + this.profile.xp0
+          const listResult = this.updateXP(xpGain, this.profile.xp1, this.profile.lvl)
+          console.log(listResult)
+          const result = await axios.put(endpoint, {xp0: listResult[0], xp1: listResult[1], lvl: listResult[2]})
+          console.log(result)
+          this.getProfileData()
+      } catch (error) {
+          console.log(error)
+      }
+    },
+    updateXP(xp0, xp1, lvl){
+      let errorCounter = 0
+      while (xp0 >= xp1){
+        lvl += 1
+        xp0 = xp0 - xp1
+        xp1 = Math.round(xp1*19/18)
+        errorCounter += 1
+        if ( errorCounter >= 10){
+          break
+        }
+      }
+      console.log(xp0, xp1, lvl)
+      return [xp0, xp1, lvl]
     }
   },
   created() {
     document.title = 'Game Project'
     this.getProfileData()
-    this.getItemsData()
   }
 }
 </script>
@@ -116,6 +152,9 @@ export default {
   box-shadow: 0px 0px 10px rgb(3, 0, 91);
 }
 .divCont {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 97%;
   height: 96%;
 }
@@ -174,6 +213,17 @@ export default {
   background-color: white;
   z-index: 3;
 }
+.statistic_container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 90%;
+  width: 35%;
+}
+.statistic {
+  margin: 1px;
+}
 
 .dot {
   background-color: rgba(0, 0, 0, 0.733);
@@ -184,11 +234,11 @@ export default {
 }
 
 .textBox {
-  height: 100px;
+  height: 250px;
   display: flex;
-  flex-direction: column;
-  align-items: start;
-  justify-content: space-evenly;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .circle3 {

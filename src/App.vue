@@ -1,6 +1,22 @@
 <template>
-  <router-view/>
+  <div class="appContainer">
+    
+    <NavbarComponent/>
+
+    <router-view/>
+  </div>
+
 </template>
+
+<script>
+
+import NavbarComponent from "@/components/NavbarComponent.vue";
+export default {
+    components: {
+        NavbarComponent
+    },
+}
+</script>
 
 <style>
 #app {
@@ -23,4 +39,27 @@ nav a {
 nav a.router-link-exact-active {
   color: #42b983;
 }
+
+.appContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.home {
+  /* margin: auto; */
+  padding: 10px;
+  height: 90vh;
+  width: 90%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid black;
+  border-radius: 50px;
+  box-shadow: 0px 0px 10px rgb(3, 0, 91);
+}
+
 </style>
