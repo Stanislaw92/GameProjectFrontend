@@ -163,6 +163,12 @@ export default {
                         this.checkedItems.splice(this.checkedItems.indexOf(el))
                         this.getItemsData()
                     } else {
+                            this.$notify({
+                                title: "Armory alert",
+                                text: "You have already equipped that slot",
+                                duration: 4000,
+                                type: 'warn'
+                            });
                         console.log('u already equipped item on this slot')
                     }
                 } catch (error) {
@@ -239,7 +245,7 @@ button:active {
     width: 100%;
     display: flex;
     justify-content: space-around;
-    align-items: center;
+    align-items: start;
     flex-direction: row;
 }
 

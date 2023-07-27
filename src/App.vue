@@ -1,19 +1,30 @@
 <template>
   <div class="appContainer">
     
-    <NavbarComponent/>
-
-    <router-view/>
+    <NavbarComponent
+    />
+    <notifications classes="customNotification" position="top center" width="500px"/>
+    <router-view
+    />
   </div>
 
 </template>
 
 <script>
 
+// import { axios } from '@/common/api.service.js';
 import NavbarComponent from "@/components/NavbarComponent.vue";
+// import AlertComponent from "@/components/AlertComponent.vue"
+
 export default {
     components: {
-        NavbarComponent
+        NavbarComponent,
+
+        // AlertComponent
+    },
+    data() {
+      return {
+      }
     },
 }
 </script>
@@ -39,6 +50,37 @@ nav a {
 nav a.router-link-exact-active {
   color: #42b983;
 }
+
+.vue-notification-group {
+  top: 55px!important;
+}
+
+.customNotification {
+  margin: 0 5px 5px;
+  padding: 10px;
+  font-size: 12px;
+  color: #ffffff;
+  border-radius: 20px;
+
+  background: #44a4fc;
+  border-left: 5px solid #187fe7;
+}
+
+.customNotification.success {
+  background: #68cd86;
+  border-left-color: #42a85f00;
+}
+
+.customNotification.warn {
+  background: #ffb648;
+  border-left-color: #f4890600;
+}
+
+.customNotification.error {
+  background: #e54d42;
+  border-left-color: #b82e2400;
+}
+
 
 .appContainer {
   width: 100%;

@@ -43,6 +43,7 @@ export default {
 	justify-content: center;
 	align-items: start;
     padding: 3px;
+	font-size: 10px;
 	/* position: absolute; */
 }
 

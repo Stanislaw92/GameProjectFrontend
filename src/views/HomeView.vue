@@ -40,6 +40,7 @@
           </div>
         </div>
       </div>
+      <button @click='test'> test </button>
     </div>
   <!-- </div> -->
 </template>
@@ -57,6 +58,14 @@ export default {
     }
   },
   methods: {
+    test(){
+      this.$notify({
+        title: "Important message",
+        text: "Hello user!",
+        duration: 400000,
+        type: 'success'
+      });
+    },
 
     //Get data of logged in profile
     async getProfileData() {

@@ -6,8 +6,8 @@
                 :to="{name: 'home'}" 
                 class="navbar_brand"    
                 :class="{ actual_page: $route.path == '/'}"
-                :style="$route.path=='/'?{borderBottom: '3px solid #ecd08b', color: '#ecd08b'}:{}"
             >
+                <!-- :style="$route.path=='/'?{borderBottom: '3px solid #ecd08b', color: '#ecd08b'}:{}" -->
 
                 Game
             </router-link>
@@ -23,7 +23,17 @@
                 class="navbar_brand small-1"    
                 :class="{ actual_page: $route.path == '/tripView/'}"
             >
-                Trip
+                
+                <div>
+                    Trip
+                    <span 
+                        v-if="$route.path != '/tripView/'"
+                        class="tripsNum"
+                    >
+                        <!-- ({{logged_in_profile.trips}}/32) -->
+                        ({{trips.trips}}/32)
+                    </span>
+                </div>
             </router-link>
             <router-link 
                 :to="{name: 'RankingView'}" 
@@ -41,12 +51,39 @@
 </template>
 
 <script>
+import { useTripStore } from '@/stores/store.js'
+import { axios } from '@/common/api.service.js';
 export default {
+
     name: 'NavbarComponent',
     components: {
 
     },
+    data() {
+        return {
+            logged_in_profile: {},
+            trips: useTripStore(),
+        }
+    },
+    methods: {
+        async refreshData(){
+            let endpoint = '/api/v1/profiles/'
+            try {
+                const response = await axios.get(endpoint)
+                this.logged_in_profile = response.data[0]
+                console.log(this.logged_in_profile)
+                this.trips.updatedTrips(this.logged_in_profile.trips)
+            } catch (error) {
+                console.log(error.response);
+                alert(error.response.statusText);
+            }
+        },
+        
+    },
     created(){
+        this.refreshData()
+    },
+    watch: {
     }
 }
 </script>
@@ -82,6 +119,7 @@ export default {
     font-size: 20px;
     margin-left: 20px;
     border-bottom: 3px solid rgba(0, 161, 193, 0);
+
 }   
 
 /* .navbar_brand:focus {
@@ -97,5 +135,9 @@ export default {
 
 .small-1 {
     font-size: 15px
+}
+.tripsNum {
+    font-size: 12px;
+    transform: translateY(1.5px);
 }
 </style>
