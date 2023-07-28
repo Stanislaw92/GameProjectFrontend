@@ -2,6 +2,7 @@
 
     <nav class="navbar">
         <div class="navbar_container">
+
             <router-link 
                 :to="{name: 'home'}" 
                 class="navbar_brand"    
@@ -11,6 +12,7 @@
 
                 Game
             </router-link>
+
             <router-link 
                 :to="{name: 'ArmoryView'}" 
                 class="navbar_brand small-1"    
@@ -18,6 +20,7 @@
             >
                 Armory
             </router-link>
+
             <router-link 
                 :to="{name: 'TripView'}" 
                 class="navbar_brand small-1"    
@@ -27,7 +30,6 @@
                 <div>
                     Trip
                     <span 
-                        v-if="$route.path != '/tripView/'"
                         class="tripsNum"
                     >
                         <!-- ({{logged_in_profile.trips}}/32) -->
@@ -35,12 +37,21 @@
                     </span>
                 </div>
             </router-link>
+
             <router-link 
                 :to="{name: 'RankingView'}" 
                 class="navbar_brand small-1"    
                 :class="{ actual_page: $route.path == '/ranking/'}"
             >
                 Ranking
+            </router-link>
+
+            <router-link 
+                :to="{name: 'MessagesView'}" 
+                class="navbar_brand small-1"    
+                :class="{ actual_page: $route.path == '/messages/'}"
+            >
+                Messages
             </router-link>
 
 

@@ -51,4 +51,8 @@ export default {
   text-decoration: none;
   color: black;
 }
+
+.name:hover{
+    text-decoration: underline;
+}
 </style>

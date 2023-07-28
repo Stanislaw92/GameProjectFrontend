@@ -5,6 +5,8 @@ import RaceView from '../views/RaceChoose.vue'
 import TripView from '../views/TripView.vue'
 import RankingView from '../views/RankingView.vue'
 import ProfileView from '../views/ProfileView.vue'
+import MessagesView from '../views/MessagesView.vue'
+import MessageDetalView from '../views/MessageDetalView.vue'
 
 const routes = [
   {
@@ -37,7 +39,18 @@ const routes = [
     name: 'ProfileView',
     component: ProfileView,
     props: true
-  }
+  },
+  {
+    path: '/messages/',
+    name: 'MessagesView',
+    component: MessagesView
+  },
+  {
+    path: '/messages/:uuid/',
+    name: 'MessageDetalView',
+    component: MessageDetalView,
+    props: true
+  },
 ]
 
 const router = createRouter({

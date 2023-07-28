@@ -1,5 +1,9 @@
 <template>
     <div class="container">
+        <div class="buttons_container">
+            <button @click="equipItem">Equip</button>
+            <button @click="unEquipItem">UnEquip</button>
+        </div>
         <div class="itemsList">
             <div v-if="loadingData">
                 <div v-for="index in 7" :key="index" class="loader">
@@ -46,8 +50,7 @@
 
 
 
-        <button @click="equipItem">Equip</button>
-        <button @click="unEquipItem">UnEquip</button>
+
     </div>
 </template>
 
@@ -304,6 +307,15 @@ button:active {
   left: 0px;
   height: 100%;
   width: 100%;
+}
+
+.buttons_container {
+    width: 70%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-direction: row;
+    margin-bottom: 10px;
 }
 
 

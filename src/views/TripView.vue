@@ -56,14 +56,14 @@ export default {
                 this.$notify({
                   title: "Trip result",
                   text: "You have successfully completed your trip!",
-                  duration: 50000,
+                  duration: 4000,
                   type: 'success'
                 });
             } else {
                 this.$notify({
                   title: "Trip result",
                   text: "You dont complete your trip",
-                  duration: 50000,
+                  duration: 4000,
                   type: 'warn'
                 });
             }
