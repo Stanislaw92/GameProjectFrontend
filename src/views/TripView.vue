@@ -1,29 +1,49 @@
 <template>
-  <div class="container">
-    <div class="card">
-      <div class="imageField">
-        <img src="../../../static/photos/Stachu_dark_wizard_opening_gate.png" alt="trip_page_photo">
-        <div class="whatever"></div>
+    <div v-if="!counter" class="card">
+      <div class="trip" >
+        <div class="imageField">
+          <img src="../../../static/photos/trip1.png" alt="trip_page_photo">
+          <div class="whatever"></div>
+        </div>
+        <div class="textField">You have {{logged_in_profile.trips}} / 32 trips left</div>
+        <div class="buttonField">
+          <button @click="startTrip">trip!</button>
+        </div>
       </div>
-      <div class="textField">You have {{logged_in_profile.trips}} / 32 trips left</div>
-      <div class="buttonField">
-        <button @click="trip">trip!</button>
-      </div>
+
     </div>
-  </div>
+    <div 
+      v-else-if="counter"
+      class="card"
+    > 
+        <span class="timer">{{counter}}</span>
+    </div>
+
 </template>
 
 <script>
+
 import { useTripStore } from '@/stores/store.js'
 import { axios } from '@/common/api.service.js';
 export default {
   name: 'TripView',
   data() {
     return {
-      logged_in_profile: {}
+      logged_in_profile: {},
+      trip_timer: 0,
+      counter: 0,
+      intervalId: '',
+      isRotate: false,
+      startRotating: false,
     }
   },
   methods: {
+      rotateCard(){
+        this.startRotating = true
+        setTimeout(()=>{
+          this.isRotate = true
+        }, 3000)
+      },
       async getProfileData() {
           let endpoint = '/api/v1/profiles/'
           try {
@@ -32,27 +52,110 @@ export default {
               console.log(this.logged_in_profile)
               const store = useTripStore()
               store.updatedTrips(this.logged_in_profile.trips)
+
+ 
+              const date_now = new Date()
+
+              if (this.logged_in_profile.trip_cooldown > date_now.getTime() && this.logged_in_profile.trip_cooldown != 0){
+                // this.interval(this.logged_in_profile.trip_cooldown)
+                const date_now = new Date()
+                  this.counter = Math.round((this.logged_in_profile.trip_cooldown - date_now.getTime()) / 1000 )
+
+                  this.intervalId  = setInterval(() => {
+                        const intervalDate = new Date()
+                        this.counter = Math.round((this.logged_in_profile.trip_cooldown - intervalDate.getTime()) / 1000 )
+                        if (this.counter <= 0){
+                          this.counter = 0
+                          clearInterval(this.intervalId)
+                        }
+            }, 1000)
+              } 
+              // else if (this.logged_in_profile.trip_cooldown <= date_now.getTime() && this.logged_in_profile.trip_cooldown != 0) {
+              //   this.trip()
+              // }
           } catch (error) {
               console.log(error.response);
               alert(error.response.statusText);
           }
       },
-      async trip() {
-        
-        const num_of_trips = this.logged_in_profile.trips - 1
-
-        const endpoint0 = `/api/v1/trip_results/create/`
+      async startTrip() {
         const endpoint = `/api/v1/profiles/${this.logged_in_profile.uuid}/`
-        try {
-            this.$emit('changeTripsNumber')
-            const result = await axios.put(endpoint, {trips: num_of_trips})
+
+        if (this.logged_in_profile.trips) {
+
+          
+          try {
+            const dateNow = new Date()
+            const timerDate = dateNow.getTime() + 10000
+            console.log(timerDate)
+
+            const result = await axios.put(endpoint, {
+              trips: this.logged_in_profile.trips - 1,
+              trip_cooldown: timerDate,
+            })
             console.log(result)
 
+            this.trip_timer = timerDate
+            this.counter = (timerDate - dateNow) / 1000
+  
+            this.interval(timerDate)
 
-            const result0 = await axios.post(endpoint0)
-            console.log(result0.data.result)
+          } catch(error){
+            console.log(error)
+          }
+        }
+      },
+      interval(timerDate) {
+            const date_now = new Date()
+            this.counter = Math.round((timerDate - date_now.getTime()) / 1000 )
 
-            if (result0.data.result == 'True') {
+            this.intervalId  = setInterval(() => {
+                  const intervalDate = new Date()
+                  this.counter = Math.round((timerDate - intervalDate.getTime()) / 1000 )
+                  console.log(this.counter)
+                  if (this.counter <= 0){
+                    this.counter = 0
+                    clearInterval(this.intervalId)
+                    this.trip()
+                  }
+            }, 1000)
+      },
+      checkTripCounter(){
+        const store = useTripStore()
+        const date_now = new Date()
+
+        console.log(store.timer)
+        console.log(date_now.getTime())
+        if (store.timer > date_now.getTime()){
+            // const counterInterval = setInterval(() => {
+            //     const date_now = new Date()
+            //     this.counter = Math.round((store.timer - date_now.getTime()) / 1000 )
+            //     console.log(this.counter)
+            //     if (this.counter == 0){
+            //       clearInterval(counterInterval)
+            //     }
+            // }, 1000)
+          this.interval(store.timer)
+        }
+      },
+      async trip() {
+
+        const endpoint = `/api/v1/trip_results/create/`
+        const endpointUpdate = `/api/v1/profiles/${this.logged_in_profile.uuid}/`
+
+
+        try {
+          this.$emit('changeTripsNumber')
+            
+            const resultUpdate = await axios.put(endpointUpdate, {
+              trip_cooldown: 0,
+            })
+
+            const result = await axios.post(endpoint)
+            console.log(result.data.result)
+            console.log(resultUpdate.data)
+
+            if (result.data.result == 'True') {
                 this.$notify({
                   title: "Trip result",
                   text: "You have successfully completed your trip!",
@@ -68,7 +171,6 @@ export default {
                 });
             }
             this.getProfileData()
-
 
         } catch (error) {
             console.log(error)
@@ -91,7 +193,18 @@ export default {
       },
   },
   created() {
+    clearInterval(this.intervalId)
     this.getProfileData()
+    // this.checkTripCounter()
+  },
+  watch: {
+        $route (to, from){
+          console.log(to)
+            if (from.fullPath == '/tripView/') {
+                // clearInterval(this.intervalId)
+            } 
+
+        }
   }
 }
 </script>
@@ -149,21 +262,14 @@ button:active {
     top: -100%;
 }
 
-.container,
+
 .card {
   display: flex;
   justify-content: center;
   align-items: center;
-
-}
-
-.container {
-  width: 95%;
-  height: 90vh;
-}
-
-.card {
   width: 75%;
+  min-width: 300px;
+  max-width: 400px;
   height: 550px;
   border: 1px solid black;
   border-radius: 10px;
@@ -174,10 +280,29 @@ button:active {
   padding: 20px;
 }
 
+.trip {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.timer {
+  font-size: 50px;
+}
+
 .textField {
   font-family: 'Lugrasimo', cursive;
   font-size: 20px;
   font-weight: bold;
   color: #feb584;
+}
+
+@media only screen and (min-width: 300px) and (max-width: 500px) {
+  .textField {
+    font-size: 15px;
+  }
 }
 </style>

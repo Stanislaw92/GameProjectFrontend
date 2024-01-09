@@ -1,28 +1,30 @@
 <template>
-    <div>
-        <div>{{profil.name}}</div>
-        <div>{{profil.race}}</div>
-        <div>{{profil.lvl}}</div>
-    </div>
+    <ProfileInspectComponent :profile='profile'/>
 </template>
 
 <script>
 import { axios } from '@/common/api.service.js';
+import ProfileInspectComponent from '../components/profileInspectComponent.vue';
+
 export default {
+
     name: 'ProfileView',
     props: ['uuid'],
     data() {
         return {
-            profil: {}
+            profile: {}
         }
+    },
+    components: {
+        ProfileInspectComponent
     },
     methods: {
         async getProfile(){
             const endpoint = `/api/v1/profiles/${this.uuid}/`
             try {
                 const response = await axios.get(endpoint)
-                this.profil = response.data
-                console.log(this.profil)
+                this.profile = response.data
+                console.log(this.profile)
                 } catch (error) {
                     console.log(error.response);
                     alert(error.response.statusText);

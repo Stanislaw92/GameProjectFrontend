@@ -248,7 +248,7 @@ button:active {
     width: 100%;
     display: flex;
     justify-content: space-around;
-    align-items: start;
+    align-items: flex-start;
     flex-direction: row;
 }
 

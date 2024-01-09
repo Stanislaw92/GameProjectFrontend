@@ -43,7 +43,7 @@ export default {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    width: 90%;
+    width: 100%;
     background-color: rgb(238, 238, 238);
     padding: 10px 0px 10px 0px;
     margin-top: 20px;

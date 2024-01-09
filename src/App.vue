@@ -4,14 +4,15 @@
     <NavbarComponent
     />
     <notifications classes="customNotification" position="top center" width="500px"/>
-    <router-view
-    />
+    <PageComponent>
+      <router-view/>
+    </PageComponent>
   </div>
 
 </template>
 
 <script>
-
+import PageComponent from './components/pageComponent.vue'
 // import { axios } from '@/common/api.service.js';
 import NavbarComponent from "@/components/NavbarComponent.vue";
 // import AlertComponent from "@/components/AlertComponent.vue"
@@ -19,7 +20,7 @@ import NavbarComponent from "@/components/NavbarComponent.vue";
 export default {
     components: {
         NavbarComponent,
-
+        PageComponent
         // AlertComponent
     },
     data() {

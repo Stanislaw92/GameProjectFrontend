@@ -20,6 +20,13 @@
             >
                 Armory
             </router-link>
+            <router-link 
+                :to="{name: 'TrainingView'}" 
+                class="navbar_brand small-1"    
+                :class="{ actual_page: $route.path == '/training/'}"
+            >
+                Training
+            </router-link>
 
             <router-link 
                 :to="{name: 'TripView'}" 
@@ -53,6 +60,13 @@
             >
                 Messages
             </router-link>
+            <router-link 
+                :to="{name: 'AmbushView'}" 
+                class="navbar_brand small-1"    
+                :class="{ actual_page: $route.path.includes('/ambush')}"
+            >
+                Ambush
+            </router-link>
 
 
 
@@ -84,6 +98,7 @@ export default {
                 this.logged_in_profile = response.data[0]
                 console.log(this.logged_in_profile)
                 this.trips.updatedTrips(this.logged_in_profile.trips)
+                this.trips.updateTimer(this.logged_in_profile.trip_cooldown)
             } catch (error) {
                 console.log(error.response);
                 alert(error.response.statusText);
@@ -92,9 +107,13 @@ export default {
         
     },
     created(){
-        this.refreshData()
+        // this.refreshData()
     },
     watch: {
+        $route (){
+            this.refreshData()
+            
+        }
     }
 }
 </script>
@@ -102,8 +121,8 @@ export default {
 <style scoped>
 .navbar {
     display: flex;
-    align-items: end;
-    justify-content: start;
+    align-items: flex-end;
+    justify-content: flex-start;
     width: 90%;
     height: 50px;
     border-bottom: 1px rgba(60, 60, 60, 0.353) solid;

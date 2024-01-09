@@ -1,9 +1,10 @@
 <template>
-  <!-- <div class="home"> -->
     <div class="divCont">
       <div class="testDiv">
         <div class="divStyle circleStyle">
-          <div class="circle"></div>
+          <div class="circle">
+            <img :src="profile.photo" alt="">
+          </div>
           <div class="circle circle3" @click="addXp(50)">
             <div class="dot"></div>
             <div class="dot"></div>
@@ -40,12 +41,14 @@
           </div>
         </div>
       </div>
-      <button @click='test'> test </button>
+      <div class="innerElement" :style="inner_element_style"></div>
+      <div class="bottom_element"></div>
+      <button @click="update_inner_element_height">test</button>
     </div>
-  <!-- </div> -->
 </template>
 
 <script>
+
 import { axios } from '@/common/api.service.js';
 
 
@@ -53,9 +56,12 @@ export default {
   name: 'HomeView',
   data() {
     return {
+      inner_element_style: 'height: 1px;',
       profile: [],
       items: [],
     }
+  },
+  components: {
   },
   methods: {
     test(){
@@ -137,8 +143,16 @@ export default {
       }
       console.log(xp0, xp1, lvl)
       return [xp0, xp1, lvl]
+    },
+    update_inner_element_height() {
+      if ( this.inner_element_style == 'height: 1px;') {
+        this.inner_element_style = 'height: 100px;'
+      } else {
+        this.inner_element_style = 'height: 1px;'
+      }
     }
   },
+  
   created() {
     document.title = 'Game Project'
     this.getProfileData()
@@ -160,13 +174,14 @@ export default {
   border-radius: 50px;
   box-shadow: 0px 0px 10px rgb(3, 0, 91);
 }
-.divCont {
+/* .divCont {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
   width: 97%;
   height: 96%;
-}
+} */
 
 .testDiv {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -176,12 +191,36 @@ export default {
   display: flex;
   flex-direction: column;
   background-color: #ecd08b;
-  border-radius: 20px;
+  border-radius: 20px 20px 0 0 ;
   justify-content:space-between;
-  align-items: start;
-  align-self: flex-start;
-  justify-self: flex-start;
+  align-items: flex-start;
+  border-bottom: 1px #ecd08b solid;
 }
+
+.bottom_element {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  /* padding:20px; */
+  height: 30px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  background-color: #ecd08b;
+  border-radius: 0 0 20px 20px;
+  align-items: flex-start;
+  border-top: 1px #ecd08b solid;
+}
+
+.innerElement {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  background-color: #ecd08b;
+  align-items: flex-start;
+  box-shadow: inset 0 0 10px #00000033;
+  transition: height 2s;
+}
+
 
 .divStyle {
   width: 100%;
@@ -194,7 +233,7 @@ export default {
   height: 100px;
   display: flex;
   flex-direction: column;
-  align-items: start;
+  align-items: flex-start;
   justify-content: center;
 }
 .progressBar__container {
@@ -221,7 +260,23 @@ export default {
   border-radius: 100%;
   background-color: white;
   z-index: 3;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
 }
+
+.circle img {
+  z-index: -1;
+  width:95%;
+  height: 95%;
+  object-fit:cover;
+  overflow:hidden;
+  border-radius: 100%;
+  /* position: relative; */
+}
+
 .statistic_container {
   display: flex;
   justify-content: center;
