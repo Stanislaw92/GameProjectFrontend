@@ -38,9 +38,11 @@
                         {{message.loot}}
                     </div>
                     <Combat1v1Component 
-                        v-if="type==3"
+                        v-if="type==3 && dataLoaded"
                         :message = "message"
                         :testArr = 'testArr'
+                        :attacker = 'attacker'
+                        :victim = "victim"
                     />
             </div>
             <div class="buttons_class">
@@ -73,6 +75,10 @@ export default {
             testArr: [],
             sender: '',
             reiever: '',
+            attacker: null,
+            victim: null,
+            str_array_loaded: false,
+            profiles_loaded: false,
         }
     },
     components: {
@@ -97,9 +103,6 @@ export default {
             try {
                 const response = await axios.get(endpoint)
                 this.message = response.data
-                
-                console.log(this.message.sender)
-                console.log(this.profile.name)
                 this.sender = String(this.message.sender)
                 this.reciever = String(this.message.reciever)
 
@@ -122,7 +125,6 @@ export default {
                 try {
                     const response = await axios.get(endpoint)
                     this.message = response.data
-                    
 
                     if ( this.message.new ){
                         this.markAsRed('trip_results')
@@ -136,15 +138,52 @@ export default {
                 try {
                     const response = await axios.get(endpoint)
                     this.message = response.data
-                    
+
 
                     if ( this.message.new ){
                         this.markAsRed('combat_result')
                     }
+
                     this.updateMessageArray()
+                    this.getPlayersProfiles()
+
+                    
+
                 } catch (error){
                     console.log(error)
                 }
+        },
+        async getPlayersProfiles(){
+            
+            const logged_in_profile = useLoggedInProfile().profile
+            
+            if (logged_in_profile.name == this.message.attacker) {
+                this.attacker = logged_in_profile
+                console.log(this.message.victim_uuid)
+                let endpoint = `/api/v1/profiles/${this.message.victim_uuid}/`
+                try {
+                    const response = await axios.get(endpoint)
+                    this.victim = response.data
+                    console.log(this.victim)
+                    this.profiles_loaded = true
+                } catch (error) {
+                        console.log(error);
+                }
+
+            } else {
+                this.victim = logged_in_profile
+                let endpoint = `/api/v1/profiles/${this.message.attacker_uuid}/`
+                try {
+                    const response = await axios.get(endpoint)
+                    this.attacker = response.data
+                    console.log(this.attacker)
+                    this.profiles_loaded = true
+
+
+                } catch (error) {
+                        console.log(error);
+                }
+            }
         },
         async markAsRed(typeOfMessage) {
             const endpoint = `/api/v1/${typeOfMessage}/${this.uuid}/`
@@ -251,15 +290,21 @@ export default {
         updateMessageArray() {
 
             this.test = this.message.result.slice(0,-1).replace(/'/g, "").replace('[',' ')
-            console.log(this.test)
             this.testArr = this.test.split( 'end of round,')
             // this.testArr = this.test.split()
             // this.testArr = this.test.split(',')
             console.log(this.testArr)
+            this.str_array_loaded = true
         },
     },
     computed: {
-
+        dataLoaded() {
+            if (this.str_array_loaded && this.profiles_loaded){
+                return true
+            } else {
+                return false
+            }
+        }
     },
     created() {
 

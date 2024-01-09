@@ -26,8 +26,6 @@ export default {
         }
     },
     created(){
-        console.log(this.line)
-        console.log(this.profileStore.profile.name)
         this.getLine()
 
 
@@ -37,8 +35,22 @@ export default {
 </script>
 
 <style scoped>
+span {
+    padding: 0;
+}
+
+.line_style:nth-child(odd) {
+    background: rgba(0, 0, 0, 0.041)
+}
+.line_style:nth-child(even) {
+    background: rgb(255, 255, 255)
+}
+
 .line_style {
+    width: 100%;
     white-space: pre-line;
+    padding: 3px 10px 5px 10px;
+
 }
 .name_of_user {
     font-size: 15px;

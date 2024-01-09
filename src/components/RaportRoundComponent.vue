@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div class="round_container">
         <div class="horizontal_line">ROUND {{index+1}}</div>
         <SingleLineRaportComponentVue 
             class="round_style" 
@@ -28,16 +28,16 @@ export default {
     },
     created() {
         this.updatedRound = this.round.replace('end of round', '').slice(1,-2).split(', ')
-        console.log(this.updatedRound)
     }
 }
 </script>
 
 <style scoped>
-    .container {
-        padding: 10px 20px 10px 20px;
+    .round_container {
+        /* padding: 10px 20px 10px 20px; */
+        padding: 0 0 20px 0;
         /* border: 1px solid black; */
-        width: 90%;
+        width: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
