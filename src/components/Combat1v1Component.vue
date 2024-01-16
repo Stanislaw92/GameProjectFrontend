@@ -58,6 +58,7 @@ export default {
         }
     },  
     created() {
+        console.log(this.message)
         console.log(this.victim)
         console.log(this.attacker)
     }

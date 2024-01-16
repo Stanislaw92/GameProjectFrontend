@@ -1,42 +1,24 @@
 <template>
-    <div class="component_container">
+
         <div 
             class="message_container"
         >
-            <div class="content_container" v-if="type==1 && message.sender != profile.name">
-                <div v-if="!message.raport" class="headerObj">
-                    <div style="width: 15%; font-size:12px;"> sender: </div>
-                    <div style="width: 70%; font-weight: bold;">{{message.sender}}</div>
-                </div>
-                <div class="headerObj">
-                    <div style="width: 15%; font-size:12px;"> title: </div>
-                    <div style="width: 70%; font-weight: bold;">{{message.title}}</div>
-                </div>
-            </div>
-            <div class="content_container" v-else-if="type==1 && message.sender == profile.name">
-                <div v-if="!message.raport" class="headerObj">
-                    <div style="width: 15%; font-size:12px;"> reciever: </div>
-                    <div style="width: 70%; font-weight: bold;">{{message.reciever}}</div>
-                </div>
-                <div class="headerObj">
-                    <div style="width: 15%; font-size:12px;"> title: </div>
-                    <div style="width: 70%; font-weight: bold;">{{message.title}}</div>
-                </div>
-            </div>
-            <div v-else-if="type!=1" class="content_container">
-                Raport
-            </div>
+            <MessageTitleContainerComponent 
+                :type="type"
+                :incoming=checkIfIncoming
+                :message="message"
+            />
             <div class="textContainer">
                     <div 
                         v-if="type==1"
                         class="wrap-it">
                         {{message.text}}
                     </div>
-                    <div 
+                    <TripMsgComponent 
                         v-if="type==2"
-                        class="wrap-it">
-                        {{message.loot}}
-                    </div>
+                        :message = "message"
+                    >
+                    </TripMsgComponent>
                     <Combat1v1Component 
                         v-if="type==3 && dataLoaded"
                         :message = "message"
@@ -46,22 +28,31 @@
                     />
             </div>
             <div class="buttons_class">
-                <button v-if="profile.name != message.sender && !message.saved && !israport" @click="answerMsg">answer</button>
-                <button v-if="!message.saved && message.sender != profile.name" @click="saveMsg">save</button>
-                <button v-if="type==1" @click="deleteMessage('txtmsg')">delete</button>
-                <button v-if="type==2" @click="deleteMessage('trip_results')">delete</button>
-                <button v-if="type==3" @click="deleteMessage('combat_result')">delete</button>
+                <ButtonComponent 
+                    v-if="profile.name != message.sender && !message.saved && !israport" @click="answerMsg"
+                    :style_of_button = 'style_of_button'
+                >answer</ButtonComponent>
+                <ButtonComponent v-if="!message.saved && message.sender != profile.name" @click="saveMsg" :style_of_button = 'style_of_button'>save</ButtonComponent>
+                <ButtonComponent 
+                    v-if="type==1"
+                    @click="deleteMessage('txtmsg')"
+                    :style_of_button = 'style_of_button'
+                >delete</ButtonComponent>
+                <ButtonComponent v-if="type==2" @click="deleteMessage('trip_results')" :style_of_button = 'style_of_button'>delete</ButtonComponent>
+                <ButtonComponent v-if="type==3" @click="deleteMessage('combat_result')" :style_of_button = 'style_of_button'>delete</ButtonComponent>
             </div>
         </div>
-
-    </div>
 </template>
 
 <script>
+import ButtonComponent from '../components/ButtonComponent.vue'
+import MessageTitleContainerComponent from '../components/MessageTitleContainerComponent.vue'
+import TripMsgComponent from '../components/TripMsgComponent.vue'
 import Combat1v1Component from '../components/Combat1v1Component'
 import { useLoggedInProfile } from '@/stores/store.js'
 import { useReplyMsgUuid } from '../stores/store'
 import { axios } from '@/common/api.service.js';
+
 export default {
     name: 'MessageDetalView',
     props: ['uuid','type'],
@@ -79,10 +70,14 @@ export default {
             victim: null,
             str_array_loaded: false,
             profiles_loaded: false,
+            style_of_button: 'primary'
         }
     },
     components: {
-        Combat1v1Component
+        Combat1v1Component,
+        MessageTitleContainerComponent,
+        ButtonComponent,
+        TripMsgComponent
     },
     methods: {
         async getProfileData() {
@@ -125,7 +120,7 @@ export default {
                 try {
                     const response = await axios.get(endpoint)
                     this.message = response.data
-
+                    console.log(this.message)
                     if ( this.message.new ){
                         this.markAsRed('trip_results')
                     }
@@ -262,7 +257,14 @@ export default {
             }
         },
         async saveMsg() {
-            const endpoint = `/api/v1/txtmsg/${this.uuid}/`
+            let endpoint = ``
+            if ( this.type == 1) {
+                endpoint = `/api/v1/txtmsg/${this.uuid}/`
+            } else if ( this.type == 2) {
+                endpoint = `/api/v1/trip_results/${this.uuid}/`
+            } else { 
+                endpoint = `/api/v1/combat_result/${this.uuid}/`
+            }
 
             try { 
                 await axios.put(endpoint, {
@@ -304,7 +306,19 @@ export default {
             } else {
                 return false
             }
+        },
+        checkIfIncoming() {
+            if (this.type ==1 && this.message.reciever == this.profile.name){
+                return 1
+            } else if (this.type ==1 && this.message.reciever != this.profile.name) {
+                return 0
+            } else if (this.type != 1) {
+                return 2
+            } else {
+                return 3
+            }
         }
+    
     },
     created() {
 
@@ -318,7 +332,9 @@ export default {
             this.israport = true
         } else if (this.type==3){
             this.get1v1Raport()
+            this.style_of_button = 'combat1v1'
             this.israport = true
+            console.log(this.style_of_button)
         }
 
 
@@ -334,29 +350,7 @@ export default {
 
 <style scoped>
 
-button {
-  background: #0a1820;
-  font-family: inherit;
-  padding: 0.3em 0.7em;
-  font-weight: 600;
-  font-size: 14px;
-  border: 3px solid rgb(0, 161, 193);
-  border-radius: 0.4em;
-  box-shadow: 0.1em 0.1em;
-  margin-top: 5px;
-  color: rgb(0, 161, 193);
 
-}
-
-button:hover {
-  transform: translate(-0.05em, -0.05em);
-  box-shadow: 0.15em 0.15em;
-}
-
-button:active {
-  transform: translate(0.05em, 0.05em);
-  box-shadow: 0.05em 0.05em;
-}
 
 .buttons_class {
     width: 40%;
@@ -366,37 +360,21 @@ button:active {
 
 }
 
-.headerObj {
-    margin: 7px 5px 7px 5px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-}
-
-.component_container{
-    width: 80%;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    flex-direction: column;
-    /* height: 90vh; */
-}
 
 .message_container {
     display: flex;
     justify-content: flex-start;
     align-items: center;
     flex-direction: column;
-    width: 90%;
+    width: 80%;
     background-color: rgb(238, 238, 238);
     padding: 10px 0px 10px 0px;
-    /* margin-top: 20px; */
-    margin-bottom: 20px;
+    margin: 3% 10%;
     border-radius: 5px;
     height: max-content;
 }
 
-.content_container {
+/* .content_container {
     display: flex;
     align-items: center;
     flex-direction: column;
@@ -407,7 +385,7 @@ button:active {
 
     border-radius: 5px;
     color: rgb(223, 223, 223);
-}
+} */
 
 .textContainer {
     display: flex;

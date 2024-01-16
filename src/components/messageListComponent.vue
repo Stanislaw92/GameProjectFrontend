@@ -204,11 +204,14 @@ export default {
                 return new Date(b.created_at) - new Date(a.created_at)
             })
         },
-        getAllMessages(){
+        getRaports() {
             this.getInboxList()
             this.getTripRaports()
             this.getCombatRaports()
+        },
+        getAllMessages(){
 
+            this.getRaports()
             this.getOutboxList()
             this.getSavedList()
             this.sortMsgs()
