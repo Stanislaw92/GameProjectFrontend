@@ -1,8 +1,8 @@
 <template>
     <div class="container">
         <div class="buttons_container">
-            <button @click="equipItem">Equip</button>
-            <button @click="unEquipItem">UnEquip</button>
+            <button @click="equip_unequip_items(equip=true)">Equip</button>
+            <button @click="equip_unequip_items(equip=false)">UnEquip</button>
         </div>
         <div class="itemsList">
             <div v-if="loadingData">
@@ -129,6 +129,9 @@ export default {
                 const response2 = await axios.get(endpoint2)
                 this.unEquippedItems.push(...response2.data)
                 console.log('unEquippedItems', this.unEquippedItems)
+                this.equippedItems.forEach((el)=>{
+                    el.clicked = false
+                })
                 this.loadingData = false
 
 
@@ -136,6 +139,8 @@ export default {
                 console.log(error.response);
                 alert(error.response.statusText);
             }
+
+            // this.updateEquippedStats()
         },
         refreshItems() {
             this.getItemsData()
@@ -148,23 +153,101 @@ export default {
                 this.itemsToUnEquip.push(item)
                 this.equippedItems[item.itemType-1].clicked = true
             }
+            console.log(this.itemsToUnEquip)
         },
         addToCheckedList(item){
             if (this.checkedItems.includes(item)) {
                 this.checkedItems.splice(this.checkedItems.indexOf(item), 1)
             } else {
                 this.checkedItems.push(item)
+                console.log(this.checkedItems)
             }
         },
+
+        async equip_unequip_items(equip){
+            let uuids_list = []
+            let data = {
+                'equipped' : equip,
+                'uuids': uuids_list
+            }
+            if (equip){
+
+                this.checkedItems.forEach((el)=>{
+                    if ( this.equippedItems[el.itemType-1].item == 0){
+                        uuids_list.push(el.uuid)
+                    } else {
+                        this.$notify({
+                            title: "Armory alert",
+                            text: "You have already equipped that slot",
+                            duration: 4000,
+                            type: 'warn'
+                        });
+                        console.log('u already equipped item on this slot')
+                    }
+                })
+                if (uuids_list.length > 0){
+                    try {      
+                        const endpoint = '/api/v1/items_update/'
+                        await axios.put(endpoint, data)
+                        this.getItemsData()
+                    } catch(error){
+                        console.log(error)
+                    }
+                } else {
+                        this.$notify({
+                            title: "Armory alert",
+                            text: "Choose atleasts 1 item",
+                            duration: 2000,
+                            type: 'warn'
+                        });
+                }
+
+            } else {
+                this.itemsToUnEquip.forEach((el)=>{
+                    uuids_list.push(el.uuid)
+                })
+
+                console.log(uuids_list)
+                
+                if (uuids_list.length > 0){
+                    try {      
+                        const endpoint = '/api/v1/items_update/'
+                        const result = await axios.put(endpoint, data)
+                        console.log(result)
+                        this.getItemsData()
+                        result.data.forEach((el)=>{
+                            this.equippedItems[el.itemType-1].item=0
+                        })
+                    } catch(error){
+                        console.log(error)
+                    }
+                } else {
+                        this.$notify({
+                            title: "Armory alert",
+                            text: "Choose atleasts 1 item",
+                            duration: 2000,
+                            type: 'warn'
+                        });
+                }
+            }
+
+        },
         async equipItem(){
-            await this.checkedItems.forEach((el)=>{
+            console.log(this.checkedItems.length)
+            this.checkedItems.forEach((el)=>{
+                console.log(el)
+            })
+
+            this.checkedItems.forEach((el)=>{
+                console.log(el)
                 let endpoint = `/api/v1/items/${el.uuid}/`
 
                 try {
                     if ( this.equippedItems[el.itemType-1].item == 0) {
-                        axios.put(endpoint, {equipped: true})
+
+
+                        axios.patch(endpoint, {equipped: true})
                         this.checkedItems.splice(this.checkedItems.indexOf(el))
-                        this.getItemsData()
                     } else {
                             this.$notify({
                                 title: "Armory alert",
@@ -179,24 +262,36 @@ export default {
                     alert(error.response.statusText)
                 }
             })
+            this.getItemsData()
         },
         async unEquipItem(){
             await this.itemsToUnEquip.forEach((el)=>{
                 let endpoint = `/api/v1/items/${el.uuid}/`
                 try {
 
-                    axios.put(endpoint, {equipped: false})
+                    axios.patch(endpoint, {equipped: false})
                     this.itemsToUnEquip.splice(this.itemsToUnEquip.indexOf(el))
                     this.equippedItems[el.itemType-1].item = 0
                     this.equippedItems[el.itemType-1].clicked = false
+                    this.checkedItems = []
                     this.getItemsData()
+                    
 
                 } catch (error) {
                     console.log(error.response)
                     alert(error.response.statusText)
                 }
             })
-        }
+        },
+        // async updateEquippedStats(){
+        //     const endpoint = `/api/v1/updateEquippedStats/`
+        //     try {
+        //         const response = await axios.post(endpoint)
+        //         console.log(response.data)
+        //     } catch ( error ) {
+        //         console.log(error)
+        //     }
+        // }
     },
     created() {
         this.getItemsData()

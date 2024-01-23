@@ -43,7 +43,7 @@
       </div>
       <div class="innerElement" :style="inner_element_style"></div>
       <div class="bottom_element"></div>
-      <button @click="update_inner_element_height">test</button>
+      <button>test</button>
     </div>
 </template>
 
@@ -150,7 +150,7 @@ export default {
       } else {
         this.inner_element_style = 'height: 1px;'
       }
-    }
+    },
   },
   
   created() {
