@@ -13,14 +13,17 @@
                 </div>
             </div>
             <div v-else>
+                <button class="checkBtns" @click="checkAll('true')"><i class="fa-solid fa-check-double fa-xl"></i></button>
+                <button class="checkBtns" @click="unCheckAll('true')"><i class="fa-solid fa-circle-xmark fa-xl"></i></button>
+                <button class="checkBtns" @click="swapCheckes('true')"><i class="fa-solid fa-arrows-rotate fa-xl"></i></button>
                 <ItemComponent
                     v-for="item in equippedItems"
-                    :item="item.item"
-                    :key="item.item"
+                    :item="item"
+                    :key="item"
+                    :checked = "item.checked"
                     class="container_items"
-                    @addToUnCheckedList ="addToUnCheckedList"
+                    @addToUnEquipList ="addToUnEquipList"
                     :equipped ="true"
-                    :clickedVar ="item.clicked"
                 />
             </div>
             <div v-if="loadingData">
@@ -32,13 +35,17 @@
             </div>
             <div v-else
                 class="unEquipped" >
+                <button class="checkBtns" @click="checkAll('false')"><i class="fa-solid fa-check-double fa-xl"></i></button>
+                <button class="checkBtns" @click="unCheckAll('false')"><i class="fa-solid fa-circle-xmark fa-xl"></i></button>
+                <button class="checkBtns" @click="swapCheckes('false')"><i class="fa-solid fa-arrows-rotate fa-xl"></i></button>
                 <ItemComponent 
                     class="container_items"
                     v-for="item in unEquippedItems" 
                     :key="item"
                     :item = "item"
+                    :checked = "item.checked"
                     @refreshItems = "refreshItems"
-                    @addToCheckedList = 'addToCheckedList'
+                    @addToEquipList = 'addToEquipList'
                     :equipped = 'false'
                 > </ItemComponent>
             </div>
@@ -60,7 +67,7 @@ import ItemComponent from '../components/itemComponent.vue';
 export default {
     name: 'ArmoryView',
     emits: 
-        ['addToCheckedList', 'addToUnCheckedList']
+        ['addToEquipList', 'addToUnEquipList']
     ,
     data() {
         return {
@@ -69,31 +76,31 @@ export default {
             [
                 {
                     item: 0,
-					clicked: false
+					checked: false
 				},
 				{
                     item: 0,
-					clicked: false
+					checked: false
 				},
 				{
                     item: 0,
-					clicked: false
+					checked: false
 				},
 				{
                     item: 0,
-					clicked: false
+					checked: false
 				},
 				{
                     item: 0,
-					clicked: false
+					checked: false
 				},
 				{
                     item: 0,
-					clicked: false
+					checked: false
 				},
 				{
                     item: 0,
-					clicked: false
+					checked: false
 				},
             ],
             profile: [],
@@ -113,87 +120,131 @@ export default {
             let endpoint = '/api/v1/items/'
             let endpoint1 = '/api/v1/eqippedItems/'
             let endpoint2 = '/api/v1/unEqippedItems/'
-            try {
+            // try {
                 this.items = []
                 const response = await axios.get(endpoint)
                 this.items.push(...response.data)
-                console.log(this.items)
 
                 const response1 = await axios.get(endpoint1)
-                response1.data.forEach((el)=>{
-                    this.equippedItems[el.itemType-1].item = el
-                })
-                console.log('equippedItems', this.equippedItems)
+                // response1.data.forEach((el)=>{
+                //     this.equippedItems[el.itemType-1].item = el
+                // })
+  
 
                 this.unEquippedItems = []
                 const response2 = await axios.get(endpoint2)
-                this.unEquippedItems.push(...response2.data)
-                console.log('unEquippedItems', this.unEquippedItems)
-                this.equippedItems.forEach((el)=>{
-                    el.clicked = false
+                
+                let arrayForLoop = []
+
+                arrayForLoop.push(...response2.data)
+                arrayForLoop.forEach((el)=>{
+                    this.unEquippedItems.push({
+                        item: el, 
+                        checked: false
+                    })
                 })
+
+                arrayForLoop = []
+                arrayForLoop.push(...response1.data)
+                arrayForLoop.forEach((el)=>{
+                    this.equippedItems[el.itemType-1].item = el
+                })
+
+                console.log('equippedItems', this.equippedItems)
+                // this.unEquippedItems.push(...response2.data)
+
+                this.equippedItems.forEach((el)=>{
+                    el.checked = false
+                })
+                console.log('unEquippedItems', this.unEquippedItems)
                 this.loadingData = false
 
-
-            } catch (error) {
-                console.log(error.response);
-                alert(error.response.statusText);
-            }
-
-            // this.updateEquippedStats()
         },
         refreshItems() {
             this.getItemsData()
         },
-        addToUnCheckedList(item) {
+        addToUnEquipList(item) {
             if (this.itemsToUnEquip.includes(item)) {
                 this.itemsToUnEquip.splice(this.itemsToUnEquip.indexOf(item), 1)
-                this.equippedItems[item.itemType-1].clicked = false
+                this.equippedItems[item.itemType-1].checked = false
             } else {
                 this.itemsToUnEquip.push(item)
-                this.equippedItems[item.itemType-1].clicked = true
+                this.equippedItems[item.itemType-1].checked = true
             }
-            console.log(this.itemsToUnEquip)
         },
-        addToCheckedList(item){
-            if (this.checkedItems.includes(item)) {
-                this.checkedItems.splice(this.checkedItems.indexOf(item), 1)
-            } else {
-                this.checkedItems.push(item)
+        addToEquipList(item){
+            console.log(item)
+                            
+            this.unEquippedItems.forEach((el)=>{
+                if ( el.item.uuid == item.item.uuid ){
+                    el.checked = !el.checked
+                }
+            })
+
+            if (this.checkedItems.includes(item.item)) {
+                this.checkedItems.splice(this.checkedItems.indexOf(item.item), 1)
+                console.log(this.checkedItems)
+            } else { 
+                this.checkedItems.push(item.item)
                 console.log(this.checkedItems)
             }
         },
 
+
         async equip_unequip_items(equip){
             let uuids_list = []
+            let listForDoubles = {
+                '1': 0,
+                '2': 0,
+                '3': 0,
+                '4': 0,
+                '5': 0,
+                '6': 0,
+                '7': 0,
+            }
             let data = {
                 'equipped' : equip,
                 'uuids': uuids_list
             }
             if (equip){
-
+                console.log(this.checkedItems)
+                console.log(this.equippedItems)
                 this.checkedItems.forEach((el)=>{
+                    console.log(this.equippedItems)
                     if ( this.equippedItems[el.itemType-1].item == 0){
-                        uuids_list.push(el.uuid)
+                        if (listForDoubles[`${el.itemType}`] == 0 ) {
+                            console.log('true')
+                            listForDoubles[`${el.itemType}`] = el.uuid
+                        }
                     } else {
                         this.$notify({
                             title: "Armory alert",
                             text: "You have already equipped that slot",
-                            duration: 4000,
+                            duration: 2000,
                             type: 'warn'
                         });
-                        console.log('u already equipped item on this slot')
                     }
                 })
+                console.log(listForDoubles)
+
+                for (const [key, value] of Object.entries(listForDoubles)) {
+                    if ( value != 0 ) {
+                        console.log(key)
+                        uuids_list.push(value)
+                    }
+                }
+
                 if (uuids_list.length > 0){
                     try {      
+                        console.log(data)
                         const endpoint = '/api/v1/items_update/'
                         await axios.put(endpoint, data)
+                        this.checkedItems = []
                         this.getItemsData()
                     } catch(error){
                         console.log(error)
                     }
-                } else {
+                } else if (uuids_list.length==0 && this.checkedItems.length==0){
                         this.$notify({
                             title: "Armory alert",
                             text: "Choose atleasts 1 item",
@@ -203,11 +254,10 @@ export default {
                 }
 
             } else {
+                console.log(this.itemsToUnEquip)
                 this.itemsToUnEquip.forEach((el)=>{
                     uuids_list.push(el.uuid)
                 })
-
-                console.log(uuids_list)
                 
                 if (uuids_list.length > 0){
                     try {      
@@ -217,6 +267,10 @@ export default {
                         this.getItemsData()
                         result.data.forEach((el)=>{
                             this.equippedItems[el.itemType-1].item=0
+                        })
+                        this.itemsToUnEquip = []
+                        this.equippedItems.forEach((el)=>{
+                            el.checked = false
                         })
                     } catch(error){
                         console.log(error)
@@ -232,85 +286,83 @@ export default {
             }
 
         },
-        async equipItem(){
-            console.log(this.checkedItems.length)
-            this.checkedItems.forEach((el)=>{
-                console.log(el)
-            })
+        checkAll(equipped){
 
-            this.checkedItems.forEach((el)=>{
-                console.log(el)
-                let endpoint = `/api/v1/items/${el.uuid}/`
-
-                try {
-                    if ( this.equippedItems[el.itemType-1].item == 0) {
-
-
-                        axios.patch(endpoint, {equipped: true})
-                        this.checkedItems.splice(this.checkedItems.indexOf(el))
-                    } else {
-                            this.$notify({
-                                title: "Armory alert",
-                                text: "You have already equipped that slot",
-                                duration: 4000,
-                                type: 'warn'
-                            });
-                        console.log('u already equipped item on this slot')
+            if (equipped == 'true'){
+                console.log(this.equippedItems)
+                this.equippedItems.forEach((el)=>{
+                    if (el.item != 0) {
+                        el.checked = true
+                        this.itemsToUnEquip.push(el.item)
                     }
-                } catch (error) {
-                    console.log(error.response)
-                    alert(error.response.statusText)
-                }
-            })
-            this.getItemsData()
-        },
-        async unEquipItem(){
-            await this.itemsToUnEquip.forEach((el)=>{
-                let endpoint = `/api/v1/items/${el.uuid}/`
-                try {
+                })
 
-                    axios.patch(endpoint, {equipped: false})
-                    this.itemsToUnEquip.splice(this.itemsToUnEquip.indexOf(el))
-                    this.equippedItems[el.itemType-1].item = 0
-                    this.equippedItems[el.itemType-1].clicked = false
-                    this.checkedItems = []
-                    this.getItemsData()
-                    
-
-                } catch (error) {
-                    console.log(error.response)
-                    alert(error.response.statusText)
-                }
-            })
+            } else {
+                this.checkedItems = []
+                this.unEquippedItems.forEach((el)=>{
+                    el.checked = true
+                    this.checkedItems.push(el.item)
+                })
+            }
         },
-        // async updateEquippedStats(){
-        //     const endpoint = `/api/v1/updateEquippedStats/`
-        //     try {
-        //         const response = await axios.post(endpoint)
-        //         console.log(response.data)
-        //     } catch ( error ) {
-        //         console.log(error)
-        //     }
-        // }
+
+        unCheckAll(equipped){
+            console.log(equipped)
+            if (equipped == 'true'){
+                this.equippedItems.forEach((el)=>{
+                    el.checked = false
+                })
+                this.itemsToUnEquip = []
+            } else {
+                console.log('unequipped')
+                this.unEquippedItems.forEach((el)=>{
+                    el.checked = false
+                })
+                this.checkedItems = []
+            }
+        },
+        swapCheckes(equipped){
+            if (equipped == 'true'){
+                this.itemsToUnEquip = []
+                this.equippedItems.forEach((el)=>{
+                    if ( el.item != 0){
+                        el.checked = !el.checked
+                        if (el.checked) {
+                            this.itemsToUnEquip.push(el)
+                        }
+                    }
+                })
+                console.log(this.itemsToUnEquip)
+            } else {
+                this.checkedItems = []
+                this.unEquippedItems.forEach((el)=>{
+                    el.checked = !el.checked
+                    if (el.checked) {
+                        this.checkedItems.push(el)
+                    }
+                })
+                console.log(this.checkedItems)
+            }
+
+        }
     },
     created() {
         this.getItemsData()
-        console.log(this.items)
     }
 }
 </script>
 
 <style scoped>
 button {
-  background: rgb(0, 161, 193);
-  font-family: inherit;
-  padding: 0.6em 1.3em;
-  font-weight: 900;
-  font-size: 18px;
-  border: 3px solid black;
-  border-radius: 0.4em;
-  box-shadow: 0.1em 0.1em;
-  margin-top: 10px;
+    background: rgb(0, 161, 193);
+    font-family: inherit;
+    padding: 0.6em 1.3em;
+    font-weight: 900;
+    font-size: 18px;
+    border: 3px solid black;
+    border-radius: 0.4em;
+    box-shadow: 0.1em 0.1em;
+    margin: 10px;
 }
 
 button:hover {
@@ -321,6 +373,14 @@ button:hover {
 button:active {
   transform: translate(0.05em, 0.05em);
   box-shadow: 0.05em 0.05em;
+}
+
+.checkBtns {
+    background: rgb(68, 194, 192);
+    padding: 0.6em 0.8em;
+    font-weight: 600;
+    font-size: 12px;
+    margin-bottom: 10px;
 }
 
 .container {

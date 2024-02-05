@@ -76,6 +76,7 @@
 </template>
 
 <script>
+import { useLoggedInProfile } from '../stores/store'
 import { useTripStore } from '@/stores/store.js'
 import { axios } from '@/common/api.service.js';
 export default {
@@ -86,8 +87,10 @@ export default {
     },
     data() {
         return {
+            
             logged_in_profile: {},
             trips: useTripStore(),
+            profileStore: useLoggedInProfile()
         }
     },
     methods: {
@@ -99,6 +102,7 @@ export default {
                 console.log(this.logged_in_profile)
                 this.trips.updatedTrips(this.logged_in_profile.trips)
                 this.trips.updateTimer(this.logged_in_profile.trip_cooldown)
+                this.profileStore.updateProfile(this.logged_in_profile)
             } catch (error) {
                 console.log(error.response);
                 alert(error.response.statusText);

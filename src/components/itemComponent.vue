@@ -1,9 +1,9 @@
 <template>
-	<div v-if="item != 0" class="itemContainer">
-		{{ item.name }}
+	<div v-if="item.item != 0" class="itemContainer">
+		{{ item.item.name }}
 
 		<div class="checkMark" @click="checkUnCheck">
-			<i v-if="clicked" class="fa-solid fa-check" style="color: #27282a"> </i>
+			<i v-if="checked" class="fa-solid fa-check" style="color: #27282a"> </i>
 		</div>
 	</div>
 	<div v-else class="itemContainer">
@@ -11,26 +11,28 @@
 		<div class=""></div>
 	</div>
 </template>
-
+l
 <script>
 // import { axios } from '@/common/api.service.js';
 export default {
 	name: 'ItemComponent',
-	props: ['item', 'equipped', 'clickedVar'],
+	props: ['item', 'equipped', 'checked'],
 	data() {
 		return {
-			clicked: this.clickedVar,
+			clicked: this.checked,
+			itemVar: null
 		};
 	},
 	methods: {
 		checkUnCheck() {
-			this.clicked = !this.clicked;
-			if (this.equipped && this.item != 0) {
-				this.$emit('addToUnCheckedList', this.item);
+			if (this.equipped && this.item.item != 0) {
+				this.$emit('addToUnEquipList', this.item);
 			} else {
-				this.$emit('addToCheckedList', this.item);
+				this.$emit('addToEquipList', this.item);
 			}
 		},
+	},
+	created() {
 	},
 };
 </script>

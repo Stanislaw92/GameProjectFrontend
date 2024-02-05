@@ -4,6 +4,7 @@
     <router-link 
       style="width: 40%;" 
       class="name"
+      :class="{current_logged_in: checkLoggedPlayer}"
       :to="{name: 'ProfileView', params: {uuid: `${this.player.uuid}`}}"
     >
         {{player.name}}
@@ -19,12 +20,21 @@
 </template>
 
 <script>
+
 export default {
-    name:'rankingItemComponent',
-    props: ['player', 'index'],
-	data() {
-		return {}
-    }
+  name:'rankingItemComponent',
+  props: ['player', 'index', 'loggedIn'],
+    data() {
+      return {
+      }
+    },
+    computed: {
+        checkLoggedPlayer() {
+          return this.loggedIn.name == this.player.name
+        }
+    },
+  created() {
+  }
 }
 </script>
 
@@ -50,6 +60,10 @@ export default {
 .name {
   text-decoration: none;
   color: black;
+}
+
+.current_logged_in {
+  color: rgb(68, 0, 255);
 }
 
 .name:hover{

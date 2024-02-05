@@ -322,9 +322,7 @@ export default {
     },
     created() {
 
- 
         this.getProfileData()
-        console.log(this.type)
         if (this.type == 1){
             this.getMessage()
         } else if ( this.type == 2){
@@ -334,11 +332,7 @@ export default {
             this.get1v1Raport()
             this.style_of_button = 'combat1v1'
             this.israport = true
-            console.log(this.style_of_button)
         }
-
-
-
 
         if (this.message.title) {
             this.israport = false

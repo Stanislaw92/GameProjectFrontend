@@ -1,5 +1,6 @@
 <template>
     <div>
+        <button @click="updateRanking">updated ranking</button>
         <div class="listDescribe_container">
             <div style="width: 5%;">#</div>
             <div style="width: 40%;">name</div>
@@ -16,20 +17,51 @@
             :player="player"
             :index ="index"
             :key="player"
+            :loggedIn='loggedInProfile.profile'
         ></RankingItemComponent>
     </div>
 </template>
 
 <script>
+import { useLoggedInProfile } from '@/stores/store.js'
+import { axios } from '@/common/api.service.js';
 import RankingItemComponent from '../components/rankingItemComponent.vue';
 export default {
     name: 'rankingListComponent',
 	props: ['players'],
     components: {
-        RankingItemComponent
+        RankingItemComponent,
+        
+    },
+    methods: {
+        async getProfileData() {
+            let endpoint = '/api/v1/profiles/'
+            try {
+                const response = await axios.get(endpoint)
+                this.loggedInProfile = response.data[0]
+                console.log(this.loggedInProfile)
+            } catch (error) {
+                        console.log(error.response);
+                        alert(error.response.statusText);
+            }
+        },
+        async updateRanking(){
+            const endpoint = "/api/v1/updateRanking/"
+            try {
+                await axios.post(endpoint)
+            } catch (error){
+                console.log(error)
+            }
+        }
     },
 	data() {
-		return {}
+		return {
+            loggedInProfile: '',
+            profileStore: useLoggedInProfile()
+        }
+    },
+    created() {
+        this.loggedInProfile = this.profileStore
     }
 }
 </script>

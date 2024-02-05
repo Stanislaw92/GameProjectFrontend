@@ -24,7 +24,6 @@ export default {
         try {
             const response = await axios.get(endpoint)
             this.players.push(...response.data)
-            console.log(this.players)
             } catch (error) {
                 console.log(error.response);
                 alert(error.response.statusText);
