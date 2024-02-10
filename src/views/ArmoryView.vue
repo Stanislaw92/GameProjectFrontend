@@ -12,10 +12,12 @@
                     </div>
                 </div>
             </div>
-            <div v-else>
-                <button class="checkBtns" @click="checkAll('true')"><i class="fa-solid fa-check-double fa-xl"></i></button>
-                <button class="checkBtns" @click="unCheckAll('true')"><i class="fa-solid fa-circle-xmark fa-xl"></i></button>
-                <button class="checkBtns" @click="swapCheckes('true')"><i class="fa-solid fa-arrows-rotate fa-xl"></i></button>
+            <div v-else class="armory_items_equipped">
+                <div class="buttons">
+                    <button class="checkBtns" @click="checkAll('true')"><i class="fa-solid fa-check-double fa-xl"></i></button>
+                    <button class="checkBtns" @click="unCheckAll('true')"><i class="fa-solid fa-circle-xmark fa-xl"></i></button>
+                    <button class="checkBtns" @click="swapCheckes('true')"><i class="fa-solid fa-arrows-rotate fa-xl"></i></button>
+                </div>
                 <ItemComponent
                     v-for="item in equippedItems"
                     :item="item"
@@ -34,10 +36,12 @@
                 </div>
             </div>
             <div v-else
-                class="unEquipped" >
-                <button class="checkBtns" @click="checkAll('false')"><i class="fa-solid fa-check-double fa-xl"></i></button>
-                <button class="checkBtns" @click="unCheckAll('false')"><i class="fa-solid fa-circle-xmark fa-xl"></i></button>
-                <button class="checkBtns" @click="swapCheckes('false')"><i class="fa-solid fa-arrows-rotate fa-xl"></i></button>
+                class="armory_items_unequipped" >
+                <div class="buttons">
+                    <button class="checkBtns" @click="checkAll('false')"><i class="fa-solid fa-check-double fa-xl"></i></button>
+                    <button class="checkBtns" @click="unCheckAll('false')"><i class="fa-solid fa-circle-xmark fa-xl"></i></button>
+                    <button class="checkBtns" @click="swapCheckes('false')"><i class="fa-solid fa-arrows-rotate fa-xl"></i></button>
+                </div>
                 <ItemComponent 
                     class="container_items"
                     v-for="item in unEquippedItems" 
@@ -164,13 +168,15 @@ export default {
             this.getItemsData()
         },
         addToUnEquipList(item) {
-            if (this.itemsToUnEquip.includes(item)) {
+            if (this.itemsToUnEquip.includes(item.item)) {
                 this.itemsToUnEquip.splice(this.itemsToUnEquip.indexOf(item), 1)
-                this.equippedItems[item.itemType-1].checked = false
+                this.equippedItems[item.item.itemType-1].checked = false
             } else {
-                this.itemsToUnEquip.push(item)
-                this.equippedItems[item.itemType-1].checked = true
+                this.itemsToUnEquip.push(item.item)
+                
+                this.equippedItems[item.item.itemType-1].checked = true
             }
+            console.log(this.itemsToUnEquip)
         },
         addToEquipList(item){
             console.log(item)
@@ -219,7 +225,7 @@ export default {
                     } else {
                         this.$notify({
                             title: "Armory alert",
-                            text: "You have already equipped that slot",
+                            text: `You have already equipped slot no ${el.itemType}`,
                             duration: 2000,
                             type: 'warn'
                         });
@@ -303,6 +309,7 @@ export default {
                     el.checked = true
                     this.checkedItems.push(el.item)
                 })
+                console.log(this.checkedItems)
             }
         },
 
@@ -328,7 +335,7 @@ export default {
                     if ( el.item != 0){
                         el.checked = !el.checked
                         if (el.checked) {
-                            this.itemsToUnEquip.push(el)
+                            this.itemsToUnEquip.push(el.item)
                         }
                     }
                 })
@@ -338,7 +345,7 @@ export default {
                 this.unEquippedItems.forEach((el)=>{
                     el.checked = !el.checked
                     if (el.checked) {
-                        this.checkedItems.push(el)
+                        this.checkedItems.push(el.item)
                     }
                 })
                 console.log(this.checkedItems)
@@ -375,6 +382,10 @@ button:active {
   box-shadow: 0.05em 0.05em;
 }
 
+.buttons {
+    margin: 10px 0 10px 0;
+}
+
 .checkBtns {
     background: rgb(68, 194, 192);
     padding: 0.6em 0.8em;
@@ -391,13 +402,13 @@ button:active {
     justify-content: space-around;
     align-items: center;
 }
-.container_items {
+/* .container_items {
     border: 1px solid black;
     width: 100px;
     height: 20px;
     position: relative;
     margin-bottom: 10px;
-}
+} */
 
 .itemsList {
     width: 100%;
@@ -415,6 +426,13 @@ button:active {
     top: 0px;
     left: 0px;
     cursor: pointer;
+}
+
+.armory_items_equipped, .armory_items_unequipped {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 .loader {
