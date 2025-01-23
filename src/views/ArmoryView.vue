@@ -1,5 +1,9 @@
 <template>
-    <div class="container">
+    <div 
+        class="container" 
+        >
+        <!-- @click="checkElement" -->
+        <ItemMobileBoxComponent/>
         <div class="buttons_container">
             <button @click="equip_unequip_items(equip=true)">Equip</button>
             <button @click="equip_unequip_items(equip=false)">UnEquip</button>
@@ -18,15 +22,26 @@
                     <button class="checkBtns" @click="unCheckAll('true')"><i class="fa-solid fa-circle-xmark fa-xl"></i></button>
                     <button class="checkBtns" @click="swapCheckes('true')"><i class="fa-solid fa-arrows-rotate fa-xl"></i></button>
                 </div>
-                <ItemComponent
-                    v-for="item in equippedItems"
-                    :item="item"
-                    :key="item"
-                    :checked = "item.checked"
-                    class="container_items"
-                    @addToUnEquipList ="addToUnEquipList"
-                    :equipped ="true"
-                />
+                <div class="equipped_items">
+                    <div class="armory_equipped_rows"
+                            v-for="item in equippedItems"
+                            :item="item"
+                            :key="item"
+                    >
+                        <div class="slot_name_class">
+                            {{ item.slotName }}
+                        </div>
+                        <ItemComponent
+                            :item="item"
+                            :key="item"
+                            :checked = "item.checked"
+                            class="container_items"
+                            @addToUnEquipList ="addToUnEquipList"
+                            :equipped ="true"
+                        />
+                    </div>
+                
+                </div>
             </div>
             <div v-if="loadingData">
                 <div v-for="index in 7" :key="index" class="loader">
@@ -66,8 +81,11 @@
 </template>
 
 <script>
+import ItemMobileBoxComponent from '../components/ItemMobileBoxComponent.vue';
 import { axios } from '@/common/api.service.js';
 import ItemComponent from '../components/itemComponent.vue';
+import { useArmoryBoxStore } from '@/stores/store.js'
+
 export default {
     name: 'ArmoryView',
     emits: 
@@ -80,31 +98,48 @@ export default {
             [
                 {
                     item: 0,
-					checked: false
+					checked: false,
+                    slotName: 'Mainhand'
+				},
+                {
+                    item: 0,
+					checked: false,
+                    slotName: 'Offhand'
+				},
+                {
+                    item: 0,
+					checked: false,
+                    slotName: 'Ring 1'
 				},
 				{
                     item: 0,
-					checked: false
+					checked: false,
+                    slotName: 'Chest'
 				},
 				{
                     item: 0,
-					checked: false
+					checked: false,
+                    slotName: 'Legs'
 				},
 				{
                     item: 0,
-					checked: false
+					checked: false,
+                    slotName: 'Ring 2'
 				},
 				{
                     item: 0,
-					checked: false
+					checked: false,
+                    slotName: 'Necklacle'
 				},
 				{
                     item: 0,
-					checked: false
+					checked: false,
+                    slotName: 'Head'
 				},
 				{
                     item: 0,
-					checked: false
+					checked: false,
+                    slotName: 'Shoes'
 				},
             ],
             profile: [],
@@ -116,9 +151,20 @@ export default {
         }
     },
     components: {
-        ItemComponent
+        ItemComponent,
+        ItemMobileBoxComponent
     },
     methods: {
+        checkElement(event){
+            if (!event.target.classList.contains("mobileBoxContainer")) {
+                console.log('dont have that class')  
+                const x = useArmoryBoxStore()
+                console.log(x.visible)
+                // if (x.visible == "visible") {
+                //     x.updateVisibility(false)
+                // }
+            }
+        },
         async getItemsData() {
             this.loadingData = true
             let endpoint = '/api/v1/items/'
@@ -145,13 +191,21 @@ export default {
                     this.unEquippedItems.push({
                         item: el, 
                         checked: false
-                    })
+                    }) 
                 })
 
                 arrayForLoop = []
                 arrayForLoop.push(...response1.data)
                 arrayForLoop.forEach((el)=>{
-                    this.equippedItems[el.itemType-1].item = el
+                    if(el.itemType == 1) {
+                        if ( this.equippedItems[0].item == 0 ) {
+                            this.equippedItems[0].item = el
+                        } else if (this.equippedItems[1].item == 0 ) {
+                            this.equippedItems[1].item = el
+                        }
+                    } else {
+                        this.equippedItems[el.itemType].item = el
+                    }
                 })
 
                 console.log('equippedItems', this.equippedItems)
@@ -207,6 +261,8 @@ export default {
                 '5': 0,
                 '6': 0,
                 '7': 0,
+                '8': 0,
+                '9': 0
             }
             let data = {
                 'equipped' : equip,
@@ -217,19 +273,51 @@ export default {
                 console.log(this.equippedItems)
                 this.checkedItems.forEach((el)=>{
                     console.log(this.equippedItems)
-                    if ( this.equippedItems[el.itemType-1].item == 0){
-                        if (listForDoubles[`${el.itemType}`] == 0 ) {
-                            console.log('true')
-                            listForDoubles[`${el.itemType}`] = el.uuid
+
+                    if ( el.itemType - 1 == 1) {
+
+                        if ( this.equippedItems[0] == 0 ) {
+
+                            if ( listForDoubles['1'] == 0) {
+                                listForDoubles['1'] = el.uuid
+                            } else if ( listForDoubles['1'] != 0 && listForDoubles['2'] == 0) {
+                                listForDoubles['2'] == el.uuid
+                            } else {
+                                console.log('both places taken')
+                            }
+
+                        } else if (this.equippedItems[1] == 0 && this.equippedItems[0] != 0) {
+
+                            if ( listForDoubles['2'] == 0) {
+                                listForDoubles['2'] = el.uuid
+                            } else {
+                                console.log('both places taken')
+                            }
+                        } else {
+                            this.$notify({
+                                title: "Armory alert",
+                                text: `You have already equipped slot no 1 and 2`,
+                                duration: 2000,
+                                type: 'warn'
+                            });
                         }
+
                     } else {
-                        this.$notify({
-                            title: "Armory alert",
-                            text: `You have already equipped slot no ${el.itemType}`,
-                            duration: 2000,
-                            type: 'warn'
-                        });
+                        if ( this.equippedItems[el.itemType-1].item == 0){
+                            if (listForDoubles[`${el.itemType}`] == 0 ) {
+                                console.log('true')
+                                listForDoubles[`${el.itemType}`] = el.uuid
+                            }
+                        } else {
+                            this.$notify({
+                                title: "Armory alert",
+                                text: `You have already equipped slot no ${el.itemType}`,
+                                duration: 2000,
+                                type: 'warn'
+                            });
+                        }
                     }
+
                 })
                 console.log(listForDoubles)
 
@@ -278,6 +366,7 @@ export default {
                         this.equippedItems.forEach((el)=>{
                             el.checked = false
                         })
+                        this.checkedItems = []
                     } catch(error){
                         console.log(error)
                     }
@@ -429,10 +518,31 @@ button:active {
 }
 
 .armory_items_equipped, .armory_items_unequipped {
+    width: 30vw;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
+}
+
+.equipped_items {
+    width: 100%;
+    max-width: 400px;
+}
+
+.armory_equipped_rows {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.slot_name_class {
+    border-bottom: 1px solid black;
+    width: 35%;
+    text-align: left;
+    font-size: 90%;
+    opacity: 60%;
 }
 
 .loader {
@@ -490,6 +600,8 @@ button:active {
     flex-direction: row;
     margin-bottom: 10px;
 }
+
+
 
 
 @keyframes gradient-animation_2 {

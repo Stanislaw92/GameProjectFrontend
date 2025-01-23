@@ -1,17 +1,15 @@
 <template>
-
 	<div v-if="equipped">
-
+		
 		<div v-if="item.item != 0" class="itemContainer" :class="{item_component_clicked_bg : checked}">
-			{{ item.item.name }}
 
+			<ItemNameComponent :item="item.item" />
 			<div class="checkMark" @click="checkUnCheck">
 				<i v-if="checked" class="fa-solid fa-check" style="color: #27282a"> </i>
-				<!-- <Icon v-if="checked" icon="charm:cross" /> -->
 			</div>
 		</div>
 		<div v-else class="itemContainer">
-			empty
+			<span style="font-weight: 600;">empty</span>
 			<div class=""></div>
 		</div>
 
@@ -20,7 +18,7 @@
 	<div v-else>
 
 		<div v-if="item.item != 0" class="itemContainer" :class="{item_component_clicked_bg:checked}">
-			{{ item.item.name }}
+			<ItemNameComponent :item="item.item" />
 
 			<div class="checkMark" @click="checkUnCheck">
 				<i v-if="checked" class="fa-solid fa-check" style="color: #27282a"> </i>
@@ -35,29 +33,56 @@
 </template>
 l
 <script>
-import { Icon } from '@iconify/vue';
+
+import ItemNameComponent from './ItemNameComponent.vue';
+// import { Icon } from '@iconify/vue';
+// import { useArmoryBoxStore } from '@/stores/store.js'
 // import { axios } from '@/common/api.service.js';
 export default {
 	name: 'ItemComponent',
-	props: ['item', 'equipped', 'checked'],
+	props: ['item', 'equipped', 'checked', 'slotName'],
 	data() {
 		return {
 			clicked: this.checked,
 			itemVar: null
 		};
 	},
-	components: [
-		Icon
-	],
+	components: {
+		// Icon,
+		ItemNameComponent,
+	},
 	methods: {
 		checkUnCheck() {
-			
 			if (this.equipped && this.item.item != 0) {
 				this.$emit('addToUnEquipList', this.item);
 			} else {
 				this.$emit('addToEquipList', this.item);
 			}
 		},
+
+		// updateItemInStore(event){
+		// 	const x = useArmoryBoxStore()
+		// 	x.updateVisibility(true)
+		// 	x.updateMouseCord(event.pageX, event.pageY)
+		// 	x.updateItem(this.item)	
+		// },
+
+		// clickItemName(event) {
+		// 	const x = useArmoryBoxStore()
+		// 	if (x.item) {
+		// 		if (x.item != this.item) {
+		// 			console.log('different item')
+		// 			this.updateItemInStore(event, x)
+		// 		} else {
+		// 			console.log('same item')
+		// 			x.updateVisibility(true)
+		// 			x.updateMouseCord(event.pageX, event.pageY)
+		// 		}
+		// 	} else {
+		// 		console.log('no item')
+		// 		this.updateItemInStore(event, x)
+		// 	}
+		// }
 	},
 	created() {
 	},
@@ -65,24 +90,11 @@ export default {
 </script>
 
 <style scoped>
-/* .item_component_border {
-	border: 1px solid black;
-	padding: 3%;
-	margin: 5px;
-} */
+img  {
+	height: 100px;
+	width: 100px;
+}
 
-/* .itemContainer {
-	height: 30px;
-	width: 200px;
-	border: 1px solid rgb(0, 0, 0);
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	align-items: center;
-    padding: 0 0 0 10px;
-	font-size: 10px;
-	
-} */
 
 .checkMark {
 	height: 100%;
@@ -112,13 +124,19 @@ export default {
 	justify-content: space-between;
 	align-items: center;
     border: 1px solid #333333;
-    font-size:12px;
+    font-size:10px;
     border-radius: 2% 6% 5% 4% / 1% 1% 2% 4%;
     text-transform: uppercase;
     letter-spacing: 0.01ch;
     position: relative;
 }
 
+.itemContainer p {
+	text-align: center;
+	margin: 0;
+	cursor: pointer;
+	z-index: 1;
+}
 
 .item_component_clicked_bg {
 	background: #cd9c52ad;
