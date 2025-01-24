@@ -14,7 +14,12 @@
 		</div>
 
 	</div>
-
+	<div v-else-if="locked">
+		<div class="itemContainer">
+			<span style="font-weight: 600;">LOCKED</span>
+			<div class=""></div>
+		</div>
+	</div>
 	<div v-else>
 
 		<div v-if="item.item != 0" class="itemContainer" :class="{item_component_clicked_bg:checked}">
@@ -24,10 +29,10 @@
 				<i v-if="checked" class="fa-solid fa-check" style="color: #27282a"> </i>
 			</div>
 		</div>
-		<div v-else class="itemContainer">
+		<!-- <div v-else class="itemContainer">
 			empty
 			<div class=""></div>
-		</div>
+		</div> -->
 
 	</div>
 </template>
@@ -40,7 +45,7 @@ import ItemNameComponent from './ItemNameComponent.vue';
 // import { axios } from '@/common/api.service.js';
 export default {
 	name: 'ItemComponent',
-	props: ['item', 'equipped', 'checked', 'slotName'],
+	props: ['item', 'equipped', 'checked', 'slotName', 'locked'],
 	data() {
 		return {
 			clicked: this.checked,

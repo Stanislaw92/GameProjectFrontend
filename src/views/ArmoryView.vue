@@ -38,6 +38,7 @@
                             class="container_items"
                             @addToUnEquipList ="addToUnEquipList"
                             :equipped ="true"
+                            :locked = 'item.locked'
                         />
                     </div>
                 
@@ -99,47 +100,56 @@ export default {
                 {
                     item: 0,
 					checked: false,
-                    slotName: 'Mainhand'
+                    slotName: 'Mainhand',
+                    locked: false
 				},
                 {
                     item: 0,
 					checked: false,
-                    slotName: 'Offhand'
+                    slotName: 'Offhand',
+                    locked: false
 				},
                 {
                     item: 0,
 					checked: false,
-                    slotName: 'Ring 1'
+                    slotName: 'Ring 1',
+                    locked: false
 				},
 				{
                     item: 0,
 					checked: false,
-                    slotName: 'Chest'
+                    slotName: 'Chest',
+                    locked: false
 				},
 				{
                     item: 0,
 					checked: false,
-                    slotName: 'Legs'
+                    slotName: 'Legs',
+                    locked: false
 				},
 				{
                     item: 0,
 					checked: false,
-                    slotName: 'Ring 2'
+                    slotName: 'Ring 2',
+                    locked: false
 				},
 				{
                     item: 0,
 					checked: false,
-                    slotName: 'Necklacle'
+                    slotName: 'Necklacle',
+                    locked: false
 				},
 				{
                     item: 0,
 					checked: false,
-                    slotName: 'Head'
+                    slotName: 'Head',
+                    locked: false
 				},
 				{
                     item: 0,
 					checked: false,
-                    slotName: 'Shoes'
+                    slotName: 'Shoes',
+                    locked: false
 				},
             ],
             profile: [],
@@ -198,11 +208,24 @@ export default {
                 arrayForLoop.push(...response1.data)
                 arrayForLoop.forEach((el)=>{
                     if(el.itemType == 1) {
-                        if ( this.equippedItems[0].item == 0 ) {
-                            this.equippedItems[0].item = el
-                        } else if (this.equippedItems[1].item == 0 ) {
-                            this.equippedItems[1].item = el
+                        if (!el.base.is_two_handed) {
+
+                            if ( this.equippedItems[0].item == 0 ) {
+                                this.equippedItems[0].item = el
+
+                            } else if (this.equippedItems[1].item == 0 ) {
+                                this.equippedItems[1].item = el
+                                this.equippedItems[1].locked = false
+                            }
+                        } else {
+
+                            if ( this.equippedItems[0].item == 0 && this.equippedItems[1] == 0) {
+                                this.equippedItems[0].item = el
+                                this.equippedItems[1].locked = true
+                                
+                            }
                         }
+   
                     } else {
                         this.equippedItems[el.itemType].item = el
                     }
@@ -222,13 +245,14 @@ export default {
             this.getItemsData()
         },
         addToUnEquipList(item) {
+            
             if (this.itemsToUnEquip.includes(item.item)) {
                 this.itemsToUnEquip.splice(this.itemsToUnEquip.indexOf(item), 1)
-                this.equippedItems[item.item.itemType-1].checked = false
+                this.equippedItems[item.item.itemType].checked = false
             } else {
                 this.itemsToUnEquip.push(item.item)
                 
-                this.equippedItems[item.item.itemType-1].checked = true
+                this.equippedItems[item.item.itemType].checked = true
             }
             console.log(this.itemsToUnEquip)
         },
@@ -273,10 +297,12 @@ export default {
                 console.log(this.equippedItems)
                 this.checkedItems.forEach((el)=>{
                     console.log(this.equippedItems)
+                    console.log(el)
 
-                    if ( el.itemType - 1 == 1) {
+                    if ( el.itemType == 1 && !el.base.is_two_handed) {
 
-                        if ( this.equippedItems[0] == 0 ) {
+
+                        if ( this.equippedItems[0].item == 0 ) {
 
                             if ( listForDoubles['1'] == 0) {
                                 listForDoubles['1'] = el.uuid
@@ -286,7 +312,7 @@ export default {
                                 console.log('both places taken')
                             }
 
-                        } else if (this.equippedItems[1] == 0 && this.equippedItems[0] != 0) {
+                        } else if (this.equippedItems[1].item == 0 && this.equippedItems[0] != 0) {
 
                             if ( listForDoubles['2'] == 0) {
                                 listForDoubles['2'] = el.uuid
@@ -302,12 +328,21 @@ export default {
                             });
                         }
 
+                    } else if ( el.itemType == 1 && el.base.is_two_handed) {
+                            if ( this.equippedItems[0].item == 0 && this.equippedItems[1].item == 0) {
+                                if (listForDoubles['1'] == 0 && listForDoubles['2'] == 0) {
+                                    listForDoubles['1'] = el.uuid
+                                } else {
+                                    console.log('both places taken')
+                                }
+                            }
                     } else {
-                        if ( this.equippedItems[el.itemType-1].item == 0){
+                        if ( this.equippedItems[el.itemType].item == 0){
                             if (listForDoubles[`${el.itemType}`] == 0 ) {
                                 console.log('true')
                                 listForDoubles[`${el.itemType}`] = el.uuid
                             }
+        
                         } else {
                             this.$notify({
                                 title: "Armory alert",
@@ -360,7 +395,8 @@ export default {
                         console.log(result)
                         this.getItemsData()
                         result.data.forEach((el)=>{
-                            this.equippedItems[el.itemType-1].item=0
+                            this.equippedItems[el.itemType].item=0
+                            
                         })
                         this.itemsToUnEquip = []
                         this.equippedItems.forEach((el)=>{
