@@ -34,6 +34,7 @@
                         <ItemComponent
                             :item="item"
                             :key="item"
+                            :slotName="item.slotName"
                             :checked = "item.checked"
                             class="container_items"
                             @addToUnEquipList ="addToUnEquipList"
@@ -206,6 +207,10 @@ export default {
 
                 arrayForLoop = []
                 arrayForLoop.push(...response1.data)
+                for (let i = 0; i<9;i++){
+                    this.equippedItems[i].item = 0
+                    this.equippedItems[i].locked = false
+                }
                 arrayForLoop.forEach((el)=>{
                     if(el.itemType == 1) {
                         if (!el.base.is_two_handed) {
@@ -244,15 +249,36 @@ export default {
         refreshItems() {
             this.getItemsData()
         },
-        addToUnEquipList(item) {
-            
-            if (this.itemsToUnEquip.includes(item.item)) {
-                this.itemsToUnEquip.splice(this.itemsToUnEquip.indexOf(item), 1)
-                this.equippedItems[item.item.itemType].checked = false
+        addToUnEquipList(item, slotName) {
+            console.log(slotName)
+            console.log(slotName == 'Mainhand')
+            if ( slotName == 'Mainhand') {
+                if (this.itemsToUnEquip.includes(item.item)) {
+                    this.itemsToUnEquip.splice(this.itemsToUnEquip.indexOf(item), 1)
+                    this.equippedItems[0].checked = false
+                } else {
+                    this.itemsToUnEquip.push(item.item)
+                    console.log(item.item.itemType)
+                    this.equippedItems[0].checked = true
+                }
+            } else if ( slotName == 'Offhand') {
+                if (this.itemsToUnEquip.includes(item.item)) {
+                    this.itemsToUnEquip.splice(this.itemsToUnEquip.indexOf(item), 1)
+                    this.equippedItems[1].checked = false
+                } else {
+                    this.itemsToUnEquip.push(item.item)
+                    console.log(item.item.itemType)
+                    this.equippedItems[1].checked = true
+                }
             } else {
-                this.itemsToUnEquip.push(item.item)
-                
-                this.equippedItems[item.item.itemType].checked = true
+                if (this.itemsToUnEquip.includes(item.item)) {
+                    this.itemsToUnEquip.splice(this.itemsToUnEquip.indexOf(item), 1)
+                    this.equippedItems[item.item.itemType].checked = false
+                } else {
+                    this.itemsToUnEquip.push(item.item)
+                    console.log(item.item.itemType)
+                    this.equippedItems[item.item.itemType].checked = true
+                }
             }
             console.log(this.itemsToUnEquip)
         },

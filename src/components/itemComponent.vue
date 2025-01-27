@@ -58,8 +58,9 @@ export default {
 	},
 	methods: {
 		checkUnCheck() {
+			console.log(this.slotName)
 			if (this.equipped && this.item.item != 0) {
-				this.$emit('addToUnEquipList', this.item);
+				this.$emit('addToUnEquipList', this.item, this.slotName);
 			} else {
 				this.$emit('addToEquipList', this.item);
 			}
